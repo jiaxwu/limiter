@@ -1,6 +1,8 @@
-package limiter
+package redis
 
 import (
+	"context"
+	"github.com/go-redis/redis/v8"
 	"testing"
 	"time"
 )
@@ -26,10 +28,13 @@ func TestNewFixedWindowLimiter(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			l := NewFixedWindowLimiter(tt.args.limit, tt.args.window)
+			client := redis.NewClient(&redis.Options{
+				Addr: "127.0.0.1:6379",
+			})
+			l, _ := NewFixedWindowLimiter(client, tt.args.limit, tt.args.window)
 			successCount := 0
 			for i := 0; i < tt.args.limit*2; i++ {
-				if l.TryAcquire() {
+				if l.TryAcquire(context.Background(), "test") == nil {
 					successCount++
 				}
 			}
@@ -39,7 +44,7 @@ func TestNewFixedWindowLimiter(t *testing.T) {
 			time.Sleep(time.Second)
 			successCount = 0
 			for i := 0; i < tt.args.limit*2; i++ {
-				if l.TryAcquire() {
+				if l.TryAcquire(context.Background(), "test") == nil {
 					successCount++
 				}
 			}

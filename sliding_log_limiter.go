@@ -57,7 +57,6 @@ func NewSlidingLogLimiter(smallWindow time.Duration, strategies ...*SlidingLogLi
 		}
 		return a.window > b.window
 	})
-	fmt.Println(strategies[0], strategies[1])
 
 	for i, strategy := range strategies {
 		// 随着窗口时间变小，窗口上限也应该变小
